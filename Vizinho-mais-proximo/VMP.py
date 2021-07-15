@@ -50,4 +50,4 @@ if __name__ == '__main__':
     custo = custoTotal(graph, ciclo)
     print("Melhor rota: ", ciclo)
     print("Custo do ciclo: ", custo)
-    print("Tempo de execução: ", "%.7f" % (float(tempo)), "ms")
+    print("Tempo de execução: ", "%.7f" % (float(tempo)), "s")
