@@ -1,14 +1,24 @@
 import itertools
 import json
+import timeit
 
 # lê o grafo a partir do arquivo json Graph_districts.json
 def ReadJson():
-    with open('Graph_districts.json', 'r', encoding='utf8') as f:
+    with open('../Graph_districts.json', 'r', encoding='utf8') as f:
         return json.load(f)
+
+# Calcula o Custo do Ciclo
+def custoTotal(graph, ciclo):
+    custo = 0
+    for i,vertice in enumerate(ciclo):
+        if i < len(ciclo)-1:
+            custo += graph[vertice][ciclo[i+1]]
+
+    return custo
 
 def CaixeiroViajante(graph):
     # gera todas as permutações de vertices
-    routes = itertools.permutations(graph)
+    rotas = itertools.permutations(range(len(graph)))
 
     # inicializa a o melhor caminho com um arrey vazio
     melhor_caminho = []
@@ -17,57 +27,54 @@ def CaixeiroViajante(graph):
     menor_custo = -1
 
     # itera sobre todos as permutacões de vertices
-    for route in routes:  
+    for rota in rotas:  
         custo = 0       # variavel para contar o custo da rota da iteração atual
         last = -1       # variavel para salvar o ultimo vertice da permutação adicionado ao caminho atual
-        first = ""      # variavel para salvar o vertice inicial do caminho atual
         caminho = []    # variavel para salvar o caminho atual
 
-        # se o vertice incial não for ponto de partida no caso a universidade passa pa
-        if(list(route)[0] != 'A'):
+        # se o vertice incial não for ponto de partida no caso a universidade, passa para a próxima permutação
+        if(rota[0] != 0):
             continue
 
         # itera por cada vertice da permutação
-        for district in route:
-            # se for o primeiro vertice da permutação inicializa as variaveis de controle a 
-            # adiciona-o ao caminho atual
-            if(last == -1):
-                first = district
-                last = district
-                caminho.append(district)
-                continue
+        for vertice in rota:
 
-            # procura na lista de arestas do vertice atual de iteração somando seu valor a 
-            # custo e adicionando-o ao caminho atual e atualizando a variavel de controle last
-            for i,key_district in enumerate(graph):
-                if(graph[district][i] > 0 and graph[key_district] == graph[last]):
-                    last = district
-                    caminho.append(district)
-                    custo += int(graph[district][i])
-                    break
+            # adiciona o veritice ao caminho atual
+            caminho.append(vertice)
+            # se não for o primeiro vertice soma o custo da aresta entre o vertice atual e o anterio ao custo atual
+            if(last != -1):
+                custo += graph[vertice][last]
+            
+            # atualiza last com o vertice atual
+            last = vertice
+
             
             # verifica se o tamanho do caminho atual já é igual ao numero de vertices
             #   se soma a custo o valor da aresta do primeiro com o ultimo vértice e o adiciona o 
             #   vertice inicial no fim do caminhao
+            # print("Custo: ", custo)
             if(len(caminho) == quant_vert):
                 caminho.append(caminho[0])
-                custo += int(graph[district][list(graph.keys()).index(first)])
+                custo += graph[vertice][caminho[0]]
                 # se for a primeira permutação, o menor custo recebe custo do caminho atual e
                 # salva o caminho atual como o melhor caminho
                 if (menor_custo == -1):
                     menor_custo = custo
-                    caminho.append(custo)
                     melhor_caminho = caminho
                     continue
                 # se o custo atual for menor que o menor custo atualiza o menor custo e melhor caminho
                 if (custo < menor_custo):
                     menor_custo = custo
-                    caminho.append(custo)
-                    melhor_caminho = caminho 
+                    melhor_caminho = caminho
 
     return melhor_caminho
 
 if __name__ == '__main__':
     graph = ReadJson()
-    district_routes = CaixeiroViajante(graph)
-    print(district_routes)
+    inicio = timeit.default_timer()
+    ciclo = CaixeiroViajante(graph)
+    tempo = timeit.default_timer() - inicio
+    custo = custoTotal(graph, ciclo)
+    print("Melhor rota: ", ciclo)
+    print("Custo do ciclo: ", custo)
+    print("Tempo de execução: ", "%.7f" % (float(tempo)), "ms")

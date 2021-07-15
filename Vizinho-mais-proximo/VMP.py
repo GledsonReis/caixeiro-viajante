@@ -1,8 +1,17 @@
 import json
+import timeit
 
 def ReadJson():
-    with open('Graph_districts.json', 'r', encoding='utf8') as f:
+    with open('../Graph_districts.json', 'r', encoding='utf8') as f:
         return json.load(f)
+
+def custoTotal(graph, ciclo):
+    custo = 0
+    for i,vertice in enumerate(ciclo):
+        if i < len(ciclo)-1:
+            custo += graph[vertice][ciclo[i+1]]
+
+    return custo
 
 def menorVerticeAdjacente(u, graph, Q):
     custo = -1
@@ -16,7 +25,6 @@ def menorVerticeAdjacente(u, graph, Q):
             custo = graph[u][i]
             vertice = i
 
-    print(custo)
     return vertice
 
 def VMP(graph):
@@ -36,5 +44,10 @@ def VMP(graph):
 
 if __name__ == '__main__':
     graph = ReadJson()
+    inicio = timeit.default_timer()
     ciclo = VMP(graph)
-    print(ciclo)
+    tempo = timeit.default_timer() - inicio
+    custo = custoTotal(graph, ciclo)
+    print("Melhor rota: ", ciclo)
+    print("Custo do ciclo: ", custo)
+    print("Tempo de execução: ", "%.7f" % (float(tempo)), "ms")
